@@ -11,8 +11,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
-@RestController
+@RestController // Allow CORS for this controller
+@CrossOrigin(origins = "http://localhost:4200")
 @RequestMapping(value = "/task")
 public class TaskController {
 
@@ -41,9 +43,9 @@ public class TaskController {
 
     // update the Task
     @PutMapping(value = "/update/{id}")
-    public ResponseEntity<String> updateTask(@RequestBody @Valid TaskDto taskDto,@PathVariable(name = "id")Long id) {
+    public ResponseEntity<String> updateTask(@RequestBody @Valid TaskDto taskDto, @PathVariable(name = "id") Long id) {
         try {
-            return ResponseEntity.status(HttpStatus.OK).body(taskService.updateTask(id,taskDto));
+            return ResponseEntity.status(HttpStatus.OK).body(taskService.updateTask(id, taskDto));
 
         } catch (TaskException e) {
             // Handle specific custom exception (e.g., validation failure, task creation issue)
@@ -59,7 +61,7 @@ public class TaskController {
 
     // Delete The Task
     @DeleteMapping(value = "/delete/{id}")
-    public ResponseEntity<String> deleteTask(@PathVariable(name = "id")Long id) {
+    public ResponseEntity<String> deleteTask(@PathVariable(name = "id") Long id) {
         try {
             return ResponseEntity.status(HttpStatus.OK).body(taskService.deleteTask(id));
 
@@ -96,6 +98,54 @@ public class TaskController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("An unexpected error occurred: " + e.getMessage());
         }
+    }
+
+    //    Fetch All Tasks
+// Fetch Task By Status
+    @GetMapping("/all")
+    public ResponseEntity<?> getAllTasks() {
+        try {
+            // Get tasks by status
+            List<Task> tasks = taskService.getAllTasks();
+            if (tasks.isEmpty()) {
+                return ResponseEntity.noContent().build();  // Return 204 No Content if no tasks found
+            }
+            return ResponseEntity.ok(tasks);  // Return 200 OK with the list of tasks
+
+        } catch (TaskException e) {
+            // Handle specific custom exception (e.g., validation failure, task creation issue)
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Task Search failed: " + e.getMessage());
+
+        } catch (Exception e) {
+            // Handle any unexpected errors, return 500 Internal Server Error
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("An unexpected error occurred: " + e.getMessage());
+        }
+
+    }
+
+    @GetMapping(value = "/get/{id}")
+    public ResponseEntity<?> getTaskByID(@PathVariable(name = "id") Long id) {
+        try {
+            // Get tasks by status
+            Optional<Task> task = taskService.getTaskByID(id);
+            if (task.isEmpty()) {
+                return ResponseEntity.noContent().build();  // Return 204 No Content if no tasks found
+            }
+            return ResponseEntity.ok(task);  // Return 200 OK with the list of tasks
+
+        } catch (TaskException e) {
+            // Handle specific custom exception (e.g., validation failure, task creation issue)
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Task Search failed: " + e.getMessage());
+
+        } catch (Exception e) {
+            // Handle any unexpected errors, return 500 Internal Server Error
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("An unexpected error occurred: " + e.getMessage());
+        }
+
     }
 
 }

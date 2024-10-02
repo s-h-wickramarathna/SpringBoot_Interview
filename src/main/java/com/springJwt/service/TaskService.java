@@ -83,4 +83,22 @@ public class TaskService {
         return repository.findByStatus(status);
     }
 
+    //Fetch All Tasks
+    public List<Task> getAllTasks() {
+        return repository.findAll();
+    }
+
+    public Optional<Task> getTaskByID(Long id) {
+        // Check if the task with the given ID exists in the database
+        Optional<Task> optionalTask = repository.findById(Math.toIntExact(id));
+
+        if (optionalTask.isPresent()) {
+            // Return the found task
+            return optionalTask;
+        } else {
+            // Return an empty Optional if the task is not found
+            return Optional.empty(); // No need to return "4" or a string
+        }
+    }
+
 }
